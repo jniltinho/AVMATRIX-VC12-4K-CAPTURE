@@ -60,10 +60,11 @@ Removes the module from every kernel and unregisters it from DKMS.
 
 ## Publish a release
 
-Pushing a `v*` tag triggers the workflow, which builds both packages and attaches them to the tag's release:
+Only tag a `main` commit whose `Build .deb` run is green. Pushing a `v*` tag triggers the workflow, which builds
+both packages and publishes them with a `SHA256SUMS` file to the tag's release:
 
 ```sh
-git tag v1.0.0.230324-1
+git tag -a v1.0.0.230324-1 -m "Release v1.0.0.230324-1"
 git push origin v1.0.0.230324-1
 ```
 

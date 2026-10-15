@@ -29,7 +29,7 @@ RUN . src/dkms.conf \
       sed -e "s/@NAME@/${PACKAGE_NAME}/g; s/@MODVER@/${PACKAGE_VERSION}/g" debian/$s > pkg/DEBIAN/$s; \
       chmod 755 pkg/DEBIAN/$s; \
     done \
- && dpkg-deb --root-owner-group --build pkg /out/hws-uhdx1-capture-dkms_${DEB_VERSION}_all.deb \
+ && dpkg-deb --root-owner-group --build pkg /out/hws-uhdx1-capture-dkms_$(echo ${DEB_VERSION} | tr "~" .)_all.deb \
  && dpkg-deb --info /out/*.deb
 
 FROM scratch
