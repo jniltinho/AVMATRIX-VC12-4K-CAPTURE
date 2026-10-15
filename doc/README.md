@@ -236,7 +236,8 @@ What the Dockerfile does, for the chosen `ubuntu:<version>` image:
 2. compiles the module against those headers (a broken build stops here, no package is produced);
 3. assembles `hws-uhdx1-capture-dkms_<version>-1.ubuntu<release>_all.deb` from `src/` and `packaging/debian/`.
 
-The package version is `PACKAGE_VERSION` from `src/dkms.conf` plus `-1~ubuntu<release>`; the file name uses `.`
+The package version is `PACKAGE_VERSION` from `src/dkms.conf`, the Debian revision from `packaging/debian/revision`
+and `~ubuntu<release>` (e.g. `1.0.0.230324-2~ubuntu24.04`); the file name uses `.`
 instead of `~` so it matches the GitHub release asset name.
 
 Test a package in a clean container:
@@ -255,12 +256,18 @@ docker run --rm -v "$PWD/out:/out:ro" ubuntu:24.04 bash -c '
 On a `v*` tag, a `release` job runs after both builds succeed: it collects the packages, writes `SHA256SUMS` and
 publishes everything to the tag's GitHub release.
 
-Only tag a `main` commit whose `Build .deb` run is green:
+The tag must be `v<PACKAGE_VERSION>-<revision>`; the workflow fails otherwise. To release:
+
+1. bump `packaging/debian/revision` (packaging-only changes) or `PACKAGE_VERSION` in `src/dkms.conf` (new driver
+   version, revision back to `1`), commit and push to `main`;
+2. wait until the `Build .deb` run for that commit is green;
+3. tag and push:
 
 ```sh
-gh run list --workflow build-deb.yml --commit "$(git rev-parse HEAD)" -L 1
-git tag -a v1.0.0.230324-1 -m "Release v1.0.0.230324-1"
-git push origin v1.0.0.230324-1
+gh run list --workflow build-deb.yml --commit "$(git rev-parse HEAD)" -L 1   # must be success
+TAG="v$(. src/dkms.conf; echo $PACKAGE_VERSION)-$(cat packaging/debian/revision)"
+git tag -a "$TAG" -m "Release $TAG"
+git push origin "$TAG"
 ```
 
 ## Repository layout

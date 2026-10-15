@@ -17,6 +17,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check tag matches package version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          . src/dkms.conf
+          want="v${PACKAGE_VERSION}-$(cat packaging/debian/revision)"
+          [ "$GITHUB_REF_NAME" = "$want" ] || { echo "::error::tag $GITHUB_REF_NAME does not match package version $want"; exit 1; }
+
       - name: Build package in ubuntu:${{ matrix.ubuntu }}
         run: make deb-${{ matrix.ubuntu }}
 

@@ -20,7 +20,7 @@ RUN KVER=$(ls /lib/modules | head -n1) \
  && test -f /tmp/check/HwsUHDX1Capture.ko
 
 RUN . src/dkms.conf \
- && DEB_VERSION="${PACKAGE_VERSION}-1~ubuntu${UBUNTU_VERSION}" \
+ && DEB_VERSION="${PACKAGE_VERSION}-$(cat debian/revision)~ubuntu${UBUNTU_VERSION}" \
  && PKG=pkg/usr/src/${PACKAGE_NAME}-${PACKAGE_VERSION} \
  && mkdir -p $PKG pkg/DEBIAN /out \
  && cp src/dkms.conf src/Makefile src/*.c src/*.h $PKG/ \
