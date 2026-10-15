@@ -38,7 +38,7 @@ compile, no package is produced.
 
 ```sh
 sudo apt install linux-headers-$(uname -r)
-sudo apt install ./out/hws-uhdx1-capture-dkms_*~ubuntu24.04_all.deb   # pick the file for your release
+sudo apt install ./out/hws-uhdx1-capture-dkms_*ubuntu24.04_all.deb   # pick the file for your release
 ```
 
 Check:
