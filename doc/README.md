@@ -1,77 +1,77 @@
-# Pacotes .deb (DKMS) para Ubuntu
+# Ubuntu .deb packages (DKMS)
 
-O driver `HwsUHDX1Capture` (AVMATRIX VC12-4K) é empacotado como **DKMS**: o `.deb` instala o código-fonte em
-`/usr/src/HwsUHDX1CaptureForLinux-<versão>` e o DKMS compila o módulo na máquina, para cada kernel instalado
-que tenha headers, e recompila sozinho a cada atualização de kernel.
+The `HwsUHDX1Capture` driver (AVMATRIX VC12-4K) is packaged as **DKMS**: the `.deb` installs the source code into
+`/usr/src/HwsUHDX1CaptureForLinux-<version>` and DKMS builds the module on the machine for every installed kernel
+that has headers, rebuilding it automatically on every kernel update.
 
-Versões suportadas: **Ubuntu 24.04** e **Ubuntu 26.04**.
+Supported releases: **Ubuntu 24.04** and **Ubuntu 26.04**.
 
-## Baixar pronto
+## Download
 
-Os pacotes ficam na página de [Releases](https://github.com/jniltinho/AVMATRIX-VC12-4K-CAPTURE/releases).
-Cada push na `main` também gera os pacotes como *artifacts* no GitHub Actions (workflow `Build .deb`).
+Prebuilt packages are on the [Releases](https://github.com/jniltinho/AVMATRIX-VC12-4K-CAPTURE/releases) page.
+Every push to `main` also builds the packages as GitHub Actions *artifacts* (workflow `Build .deb`).
 
-## Gerar localmente
+## Build locally
 
-Requisitos: `make` e Docker com BuildKit (Docker 23+).
+Requirements: `make` and Docker with BuildKit (Docker 23+).
 
 ```sh
-make              # gera os pacotes para 24.04 e 26.04 em ./out
-make deb-24.04    # só Ubuntu 24.04
-make deb-26.04    # só Ubuntu 26.04
-make clean        # apaga ./out
+make              # builds the packages for 24.04 and 26.04 into ./out
+make deb-24.04    # Ubuntu 24.04 only
+make deb-26.04    # Ubuntu 26.04 only
+make clean        # removes ./out
 ```
 
-Variáveis: `UBUNTU_VERSIONS` (padrão `24.04 26.04`) e `OUT` (padrão `out`), por exemplo
+Variables: `UBUNTU_VERSIONS` (default `24.04 26.04`) and `OUT` (default `out`), e.g.
 `make UBUNTU_VERSIONS=26.04 OUT=/tmp/debs`.
 
-Sem `make`, o comando equivalente é:
+Without `make`, the equivalent command is:
 
 ```sh
 docker build -f packaging/Dockerfile --build-arg UBUNTU_VERSION=24.04 --output out .
 ```
 
-Durante o build o módulo é compilado contra os headers do kernel *generic* da versão do Ubuntu
-escolhida; se o driver não compilar, o pacote não é gerado.
+During the build the module is compiled against the release's *generic* kernel headers; if the driver does not
+compile, no package is produced.
 
-## Instalar
+## Install
 
 ```sh
 sudo apt install linux-headers-$(uname -r)
-sudo apt install ./out/hws-uhdx1-capture-dkms_*~ubuntu24.04_all.deb   # use o arquivo da sua versão
+sudo apt install ./out/hws-uhdx1-capture-dkms_*~ubuntu24.04_all.deb   # pick the file for your release
 ```
 
-Conferir:
+Check:
 
 ```sh
 dkms status                 # HwsUHDX1CaptureForLinux/..., <kernel>, x86_64: installed
 lsmod | grep HwsUHDX1Capture
 ```
 
-O pacote substitui o `install.sh`/`dkms-install.sh`; não use os dois ao mesmo tempo.
+The package replaces `install.sh`/`dkms-install.sh`; do not use both at the same time.
 
-## Remover
+## Remove
 
 ```sh
 sudo apt remove hws-uhdx1-capture-dkms
 ```
 
-Remove o módulo de todos os kernels e o registro no DKMS.
+Removes the module from every kernel and unregisters it from DKMS.
 
-## Publicar uma release
+## Publish a release
 
-Criar e enviar uma tag `v*` dispara o workflow, que gera os dois pacotes e os anexa à release da tag:
+Pushing a `v*` tag triggers the workflow, which builds both packages and attaches them to the tag's release:
 
 ```sh
 git tag v1.0.0.230324-1
 git push origin v1.0.0.230324-1
 ```
 
-## Arquivos
+## Files
 
-| Arquivo | Função |
+| File | Purpose |
 |---|---|
-| `packaging/Dockerfile` | Compila o módulo (teste) e monta o `.deb` para a versão em `UBUNTU_VERSION` |
-| `packaging/debian/` | `control`, `postinst` (dkms add/install) e `prerm` (dkms remove) |
-| `Makefile` | Atalhos `make deb`, `make deb-<versão>`, `make clean` |
-| `.github/workflows/build-deb.yml` | CI: gera os pacotes e publica nas releases de tags `v*` |
+| `packaging/Dockerfile` | Compiles the module (check) and assembles the `.deb` for `UBUNTU_VERSION` |
+| `packaging/debian/` | `control`, `postinst` (dkms add/install) and `prerm` (dkms remove) |
+| `Makefile` | Shortcuts `make deb`, `make deb-<version>`, `make clean` |
+| `.github/workflows/build-deb.yml` | CI: builds the packages and publishes them to `v*` tag releases |
